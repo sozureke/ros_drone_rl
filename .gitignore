@@ -1,0 +1,48 @@
+# === ROS 2 build artifacts ===
+build/
+install/
+log/
+.envrc
+
+# === Colcon metadata ===
+.colcon_install_layout
+
+# === Python artifacts ===
+*.pyc
+__pycache__/
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+*.log
+
+# === VSCode and JetBrains IDEs ===
+.vscode/
+.idea/
+
+# === PX4-specific ===
+src/PX4-Autopilot/build/
+src/PX4-Autopilot/logs/
+src/PX4-Autopilot/ROMFS/
+src/PX4-Autopilot/platforms/posix/px4-uorb-generated/
+
+# === ROS 2 bags ===
+*.db3
+*.bag
+*.bag.meta
+*.mcap
+
+# === Launch/test cache ===
+*.launch.pyc
+*.test.pyc
+
+# === CMake ===
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# === Misc ===
+*.swp
+*~
+*.DS_Store
