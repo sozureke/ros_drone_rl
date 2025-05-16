@@ -1,0 +1,13 @@
+# Goal
+float64 platform_x
+float64 platform_y
+float64 platform_z
+float64 hover_altitude
+---
+# Feedback
+drone_interfaces/DroneState current_state
+drone_interfaces/PlatformState platform_state
+---
+# Result
+bool success
+string message

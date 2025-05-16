@@ -35,6 +35,7 @@ src/PX4-Autopilot/platforms/posix/px4-uorb-generated/
 # === Launch/test cache ===
 *.launch.pyc
 *.test.pyc
+.cache/
 
 # === CMake ===
 CMakeFiles/
