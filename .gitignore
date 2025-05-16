@@ -46,3 +46,4 @@ Makefile
 *.swp
 *~
 *.DS_Store
+HELP.md

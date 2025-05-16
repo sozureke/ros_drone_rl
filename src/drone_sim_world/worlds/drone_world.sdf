@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+  <world name="drone_test_world">
+
+    <!-- --- встроенная ground plane --- -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.5 0.5 0.5 1</ambient>
+            <diffuse>0.7 0.7 0.7 1</diffuse>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- --- встроенный directional light вместо sun --- -->
+    <light name="sun" type="directional">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.5 -1</direction>
+    </light>
+
+    <!-- --- зона посадки (статичная) --- -->
+    <model name="landing_zone">
+      <static>true</static>
+      <link name="link">
+        <pose>0 0 0.01 0 0 0</pose>
+        <visual name="visual">
+          <geometry>
+            <box><size>5 5 0.02</size></box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.6 1</ambient>
+            <diffuse>0.2 0.2 0.6 1</diffuse>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box><size>5 5 0.02</size></box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- --- движущаяся платформа (возьмём модель из папки models) --- -->
+    <include>
+      <uri>model://moving_platform</uri>
+    </include>
+
+  </world>
+</sdf>
