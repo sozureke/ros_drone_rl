@@ -1,4 +1,5 @@
-import asyncio
+#!/usr/bin/env python3
+import time
 
 import rclpy
 from rclpy.node import Node
@@ -7,11 +8,10 @@ from rclpy.action import ActionServer, GoalResponse, CancelResponse
 from drone_interfaces.action import LandOnPlatform
 from drone_interfaces.msg import DroneState as DroneStateMsg, PlatformState as PlatformStateMsg
 from drone_control.command_gateway import CommandGateway
-from .offboard_fsm import OffboardFSM
+from drone_control.offboard_fsm import OffboardFSM
 
 
 class FSMActionServer(Node):
-
     def __init__(self):
         super().__init__('fsm_action_server')
 
@@ -22,15 +22,9 @@ class FSMActionServer(Node):
         self._current_platform_state = None
 
         self.create_subscription(
-            DroneStateMsg,
-            'drone/state',
-            self._drone_state_cb,
-            10)
+            DroneStateMsg, 'drone/state', self._drone_cb, 10)
         self.create_subscription(
-            PlatformStateMsg,
-            'platform/state',
-            self._platform_state_cb,
-            10)
+            PlatformStateMsg, 'platform/state', self._platform_cb, 10)
 
         self._action_server = ActionServer(
             self,
@@ -38,66 +32,48 @@ class FSMActionServer(Node):
             'land_on_platform',
             execute_callback=self.execute_callback,
             goal_callback=self.goal_callback,
-            cancel_callback=self.cancel_callback,
-        )
+            cancel_callback=self.cancel_callback)
 
-        self._feedback = LandOnPlatform.Feedback()
-        self._result = LandOnPlatform.Result()
+        self._fb = LandOnPlatform.Feedback()
+        self._res = LandOnPlatform.Result()
 
-    def _drone_state_cb(self, msg: DroneStateMsg):
-        self._current_drone_state = msg
+    def _drone_cb(self, msg):      self._current_drone_state = msg
+    def _platform_cb(self, msg):   self._current_platform_state = msg
+    def goal_callback(self, _):    return GoalResponse.ACCEPT
+    def cancel_callback(self, _):  return CancelResponse.ACCEPT
 
-    def _platform_state_cb(self, msg: PlatformStateMsg):
-        self._current_platform_state = msg
+    def execute_callback(self, handle):
+        req = handle.request
 
-    def goal_callback(self, goal_request):
-        return GoalResponse.ACCEPT
-
-    def cancel_callback(self, goal_handle):
-        return CancelResponse.ACCEPT
-
-    async def execute_callback(self, goal_handle):
-        req = goal_handle.request
-
-        self._fsm.reset(
-            req.platform_x,
-            req.platform_y,
-            req.platform_z
-        )
+        self._fsm.reset(req.platform_x, req.platform_y, req.platform_z)
         self._fsm._hover_altitude = req.hover_altitude
 
-        while (
-            self._current_drone_state is None
-            or self._current_platform_state is None
-        ):
-            await asyncio.sleep(0.1)
+        while self._current_drone_state is None or self._current_platform_state is None:
+            time.sleep(0.05)
 
-        done = False
-        success = False
-
+        done, success = False, False
         while not done:
-            feedback_data, done, success = self._fsm.step(
+            _, done, success = self._fsm.step(
                 self._current_drone_state,
-                self._current_platform_state
-            )
+                self._current_platform_state)
 
-            self._feedback.current_state = self._current_drone_state
-            self._feedback.platform_state = self._current_platform_state
-            goal_handle.publish_feedback(self._feedback)
+            self._fb.current_state = self._current_drone_state
+            self._fb.platform_state = self._current_platform_state
+            handle.publish_feedback(self._fb)
 
-            await asyncio.sleep(0.1)
+            time.sleep(0.05)
 
-        self._result.success = success
-        self._result.message = 'Landed' if success else 'Failed'
-        goal_handle.succeed()
-        return self._result
+        self._res.success = success
+        self._res.message = 'Landed' if success else 'Failed'
+        handle.succeed()
+        return self._res
 
 
 def main(args=None):
     rclpy.init(args=args)
-    action_server = FSMActionServer()
-    rclpy.spin(action_server)
-    action_server.destroy_node()
+    node = FSMActionServer()
+    rclpy.spin(node)
+    node.destroy_node()
     rclpy.shutdown()
 
 
