@@ -7,8 +7,6 @@
   <maintainer email="sozure.synergy@gmail.com">sozureke</maintainer>
   <license>TODO: License declaration</license>
 
-  <depend>rclpy</depend>
-  <depend>drone_interfaces</depend>
   <depend>px4_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>std_msgs</depend>

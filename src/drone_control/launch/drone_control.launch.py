@@ -10,7 +10,6 @@ def generate_launch_description():
         '~/ros2_ws/rl_drone_ws/src/drone_sim_world/worlds/drone_world.sdf'
     )
 
-    # 1) PX4 SITL
     px4 = ExecuteProcess(
         cmd=[
             './bin/px4',
@@ -24,7 +23,6 @@ def generate_launch_description():
         output='screen'
     )
 
-    # 2) Micro XRCE-DDS Agent
     xrce = ExecuteProcess(
         cmd=[
             'MicroXRCEAgent',
@@ -36,13 +34,11 @@ def generate_launch_description():
         output='screen'
     )
 
-    # 3) Ignition Gazebo
     ign_gazebo = ExecuteProcess(
         cmd=['ign', 'gazebo', '-r', '-v', '4', world_path],
         output='screen'
     )
 
-    # 4) Спавн дрона (ждём 2 сек после поднятия Gazebo)
     spawn_drone = ExecuteProcess(
         cmd=[
             'ign', 'service', '-s', '/world/drone_test_world/create',
@@ -54,20 +50,16 @@ def generate_launch_description():
         output='screen'
     )
 
-    # 5) Ваш контроллер + FSM
     offboard_fsm = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_share, 'launch', 'offboard_fsm.launch.py')
         )
     )
 
-    # Собираем последовательность с задержками, чтобы каждый компонент успевал подняться
     return LaunchDescription([
         px4,
         xrce,
         ign_gazebo,
-        # ждём 2 сек, чтобы Gazebo стартовал, потом спавним дрон
         TimerAction(period=2.0, actions=[spawn_drone]),
-        # ещё 1 сек подождём, и запускаем наш контроллер
         TimerAction(period=3.0, actions=[offboard_fsm]),
     ])
