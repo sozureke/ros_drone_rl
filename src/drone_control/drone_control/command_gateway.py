@@ -14,13 +14,11 @@ class CommandGateway(Node):
         self._sp_pub = self.create_publisher(
             TrajectorySetpoint, 'fmu/in/trajectory_setpoint', 10)
 
-    # -------------------------------------------------
-    # helpers
-    # -------------------------------------------------
+
     def _send_cmd(self, cmd: int, p1: float = 0.0, p2: float = 0.0):
         msg = VehicleCommand()
         msg.timestamp = self.get_clock().now().nanoseconds // 1_000
-        msg.command = float(cmd)
+        msg.command = int(cmd)
         msg.param1 = float(p1)
         msg.param2 = float(p2)
         msg.target_system = msg.source_system = 1
@@ -37,9 +35,6 @@ class CommandGateway(Node):
     def disarm(self):
         self._send_cmd(VehicleCommand.VEHICLE_CMD_COMPONENT_ARM_DISARM, p1=0.0)
 
-    # -------------------------------------------------
-    # set-points
-    # -------------------------------------------------
     def publish_position(self, x: float, y: float, z: float, yaw: float = 0.0):
         sp = TrajectorySetpoint()
         sp.timestamp = self.get_clock().now().nanoseconds // 1_000
